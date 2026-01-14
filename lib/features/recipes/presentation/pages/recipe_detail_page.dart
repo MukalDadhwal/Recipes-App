@@ -39,8 +39,10 @@ class _RecipeDetailPageContent extends StatefulWidget {
 }
 
 class _RecipeDetailPageContentState extends State<_RecipeDetailPageContent>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late TabController _tabController;
+  late AnimationController _favoriteAnimationController;
+  late Animation<double> _favoriteScaleAnimation;
   bool? _localFavoriteStatus;
   YoutubePlayerController? _youtubeController;
   String? _youtubeVideoId;
@@ -49,13 +51,35 @@ class _RecipeDetailPageContentState extends State<_RecipeDetailPageContent>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _favoriteAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _favoriteScaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.0,
+          end: 1.3,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 50,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1.3,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.elasticOut)),
+        weight: 50,
+      ),
+    ]).animate(_favoriteAnimationController);
+    _tabController = TabController(length: 3, vsync: this);
     context.read<MealRecipeBloc>().add(GetMealByIdEvent(widget.mealId));
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
     _youtubeController?.dispose();
+    _tabController.dispose();
+    _favoriteAnimationController.dispose();
     super.dispose();
   }
 
@@ -64,7 +88,12 @@ class _RecipeDetailPageContentState extends State<_RecipeDetailPageContent>
       return;
     }
 
-    _youtubeController?.dispose();
+    try {
+      _youtubeController?.dispose();
+    } catch (e) {
+      // Controller already disposed ignore
+    }
+    
     _youtubeVideoId = videoId;
     _youtubeController = YoutubePlayerController(
       initialVideoId: videoId,
@@ -77,6 +106,7 @@ class _RecipeDetailPageContentState extends State<_RecipeDetailPageContent>
   }
 
   void _toggleFavorite(MealModel meal, bool currentStatus) {
+    _favoriteAnimationController.forward(from: 0.0);
     setState(() {
       _localFavoriteStatus = !currentStatus;
     });
@@ -128,59 +158,111 @@ class _RecipeDetailPageContentState extends State<_RecipeDetailPageContent>
       headerSliverBuilder: (context, innerBoxIsScrolled) {
         return [
           SliverAppBar(
-            expandedHeight: 300.h,
+            expandedHeight: 320.h,
             pinned: true,
+            backgroundColor: Colors.white,
+            leading: Container(
+              margin: EdgeInsets.all(8.w),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
             flexibleSpace: FlexibleSpaceBar(
-              background: Hero(
-                tag: 'meal_${meal.id}',
-                child: InteractiveViewer(
-                  panEnabled: true,
-                  boundaryMargin: const EdgeInsets.all(20),
-                  minScale: 0.5,
-                  maxScale: 4,
-                  child: CachedNetworkImage(
-                    imageUrl: '${meal.thumbnail ?? ''}/large',
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      color: Colors.grey[300],
-                      child: Icon(Icons.restaurant, size: 48.sp),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: Colors.grey[300],
-                      child: Icon(Icons.restaurant, size: 48.sp),
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Hero(
+                    tag: 'meal_${meal.id}',
+                    child: CachedNetworkImage(
+                      imageUrl: '${meal.thumbnail ?? ''}/large',
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: Colors.grey[200],
+                        child: Icon(Icons.restaurant, size: 48.sp),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.grey[200],
+                        child: Icon(Icons.restaurant, size: 48.sp),
+                      ),
                     ),
                   ),
-                ),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withOpacity(0.3),
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.7),
+                        ],
+                        stops: const [0.0, 0.5, 1.0],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             actions: [
-              BlocBuilder<FavoritesBloc, FavoritesState>(
-                builder: (context, state) {
-                  bool isFavorite = _localFavoriteStatus ?? false;
-                  if (_localFavoriteStatus == null) {
-                    if (state is FavoriteStatusState) {
-                      isFavorite = state.isFavorite;
-                    } else if (state is FavoriteAddedState) {
-                      isFavorite = state.mealId == meal.id;
-                    } else if (state is FavoriteRemovedState) {
-                      isFavorite = false;
-                    }
-                  }
-                  return IconButton(
-                    icon: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      transitionBuilder: (child, animation) {
-                        return ScaleTransition(scale: animation, child: child);
-                      },
-                      child: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        key: ValueKey(isFavorite),
-                        color: isFavorite ? Colors.red : null,
-                      ),
+              Container(
+                margin: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
-                    onPressed: () => _toggleFavorite(meal, isFavorite),
-                  );
-                },
+                  ],
+                ),
+                child: BlocBuilder<FavoritesBloc, FavoritesState>(
+                  builder: (context, state) {
+                    bool isFavorite = _localFavoriteStatus ?? false;
+                    if (_localFavoriteStatus == null) {
+                      if (state is FavoriteStatusState) {
+                        isFavorite = state.isFavorite;
+                      } else if (state is FavoriteAddedState) {
+                        isFavorite = state.mealId == meal.id;
+                      } else if (state is FavoriteRemovedState) {
+                        isFavorite = false;
+                      }
+                    }
+                    return ScaleTransition(
+                      scale: _favoriteScaleAnimation,
+                      child: IconButton(
+                        icon: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          transitionBuilder: (child, animation) {
+                            return ScaleTransition(
+                              scale: animation,
+                              child: child,
+                            );
+                          },
+                          child: Icon(
+                            isFavorite ? Icons.favorite : Icons.favorite_border,
+                            key: ValueKey(isFavorite),
+                            color: isFavorite ? Colors.red : Colors.black87,
+                          ),
+                        ),
+                        onPressed: () => _toggleFavorite(meal, isFavorite),
+                      ),
+                    );
+                  },
+                ),
               ),
             ],
           ),
@@ -188,50 +270,108 @@ class _RecipeDetailPageContentState extends State<_RecipeDetailPageContent>
       },
       body: Column(
         children: [
-          Padding(
-            padding: EdgeInsets.all(16.w),
+          Container(
+            color: Colors.white,
+            padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 12.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   meal.name,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+                  style: TextStyle(
+                    fontSize: 24.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black87,
                   ),
                 ),
-                SizedBox(height: 8.h),
+                SizedBox(height: 12.h),
                 Row(
                   children: [
                     if (meal.category != null) ...[
-                      Chip(
-                        label: Text(
-                          meal.category!,
-                          style: TextStyle(color: Colors.black87),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 6.h,
                         ),
-                        avatar: Icon(Icons.category, size: 16.sp),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8F5E9),
+                          borderRadius: BorderRadius.circular(20.r),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.category,
+                              size: 14.sp,
+                              color: const Color(0xFF129575),
+                            ),
+                            SizedBox(width: 4.w),
+                            Text(
+                              meal.category!,
+                              style: TextStyle(
+                                color: const Color(0xFF129575),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12.sp,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       SizedBox(width: 8.w),
                     ],
                     if (meal.area != null)
-                      Chip(
-                        label: Text(
-                          meal.area!,
-                          style: TextStyle(color: Colors.black87),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 6.h,
                         ),
-                        avatar: Icon(Icons.place, size: 16.sp),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8F5E9),
+                          borderRadius: BorderRadius.circular(20.r),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.place,
+                              size: 14.sp,
+                              color: const Color(0xFF129575),
+                            ),
+                            SizedBox(width: 4.w),
+                            Text(
+                              meal.area!,
+                              style: TextStyle(
+                                color: const Color(0xFF129575),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12.sp,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                   ],
                 ),
               ],
             ),
           ),
-          TabBar(
-            controller: _tabController,
-            tabs: const [
-              Tab(text: 'Overview'),
-              Tab(text: 'Ingredients'),
-              Tab(text: 'Instructions'),
-            ],
+          Container(
+            color: Colors.white,
+            child: TabBar(
+              controller: _tabController,
+              labelColor: const Color(0xFF129575),
+              unselectedLabelColor: Colors.grey[600],
+              labelStyle: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+              ),
+              indicatorColor: const Color(0xFF129575),
+              indicatorWeight: 3,
+              tabs: const [
+                Tab(text: 'Overview'),
+                Tab(text: 'Ingredients'),
+                Tab(text: 'Instructions'),
+              ],
+            ),
           ),
           Expanded(
             child: TabBarView(
@@ -260,7 +400,7 @@ class _RecipeDetailPageContentState extends State<_RecipeDetailPageContent>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (videoId.isNotEmpty) ...[
+          if (videoId.isNotEmpty && _youtubeController != null) ...[
             Text(
               'Video Tutorial',
               style: Theme.of(context).textTheme.titleLarge,
@@ -319,46 +459,70 @@ class _RecipeDetailPageContentState extends State<_RecipeDetailPageContent>
     final ingredients = meal.ingredientsWithMeasures;
 
     return ListView.builder(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(20.w),
       itemCount: ingredients.length,
       itemBuilder: (context, index) {
         final ingredient = ingredients[index];
-        return Card(
+        return Container(
           margin: EdgeInsets.only(bottom: 12.h),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
           child: ListTile(
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 8.h,
+            ),
             leading: ClipRRect(
-              borderRadius: BorderRadius.circular(8.r),
+              borderRadius: BorderRadius.circular(10.r),
               child: CachedNetworkImage(
                 imageUrl: ImageUtils.getIngredientImage(ingredient.key),
-                width: 50.w,
-                height: 50.h,
+                width: 55.w,
+                height: 55.h,
                 fit: BoxFit.cover,
                 placeholder: (context, url) => Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
+                  baseColor: Colors.grey[200]!,
+                  highlightColor: Colors.grey[50]!,
                   child: Container(
-                    width: 50.w,
-                    height: 50.h,
+                    width: 55.w,
+                    height: 55.h,
                     color: Colors.white,
                   ),
                 ),
                 errorWidget: (context, url, error) => Container(
-                  width: 50.w,
-                  height: 50.h,
-                  color: Colors.grey[300],
-                  child: Icon(Icons.fastfood, size: 24.sp),
+                  width: 55.w,
+                  height: 55.h,
+                  color: Colors.grey[100],
+                  child: Icon(
+                    Icons.fastfood,
+                    size: 24.sp,
+                    color: Colors.grey[300],
+                  ),
                 ),
               ),
             ),
             title: Text(
               ingredient.key,
-              style: const TextStyle(fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 15.sp,
+                color: Colors.black87,
+              ),
             ),
             trailing: Text(
               ingredient.value,
               style: TextStyle(
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
+                color: const Color(0xFF129575),
+                fontWeight: FontWeight.w600,
+                fontSize: 14.sp,
               ),
             ),
           ),
@@ -371,27 +535,35 @@ class _RecipeDetailPageContentState extends State<_RecipeDetailPageContent>
     final steps = StringUtils.parseInstructions(meal.instructions);
 
     return ListView.builder(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(20.w),
       itemCount: steps.length,
       itemBuilder: (context, index) {
-        return Padding(
-          padding: EdgeInsets.only(bottom: 16.h),
+        return Container(
+          margin: EdgeInsets.only(bottom: 20.h),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: 32.w,
-                height: 32.h,
+                width: 36.w,
+                height: 36.h,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
+                  color: const Color(0xFF129575),
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF129575).withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Center(
                   child: Text(
                     '${index + 1}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
+                      fontSize: 16.sp,
                     ),
                   ),
                 ),
@@ -400,7 +572,11 @@ class _RecipeDetailPageContentState extends State<_RecipeDetailPageContent>
               Expanded(
                 child: Text(
                   steps[index],
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    color: Colors.grey[700],
+                    height: 1.5,
+                  ),
                 ),
               ),
             ],

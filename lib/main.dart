@@ -36,49 +36,106 @@ class MyApp extends StatelessWidget {
             theme: ThemeData(
               useMaterial3: true,
               colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFF2E7D32),
-                primary: const Color(0xFF2E7D32),
-                secondary: const Color(0xFF66BB6A),
+                seedColor: const Color(0xFF129575),
+                primary: const Color(0xFF129575),
+                secondary: const Color(0xFF71B1A1),
                 surface: Colors.white,
-                surfaceContainerLowest: const Color(0xFFF5F7FA),
+                surfaceContainerLowest: const Color(0xFFF9F9F9),
               ),
-              textTheme: GoogleFonts.poppinsTextTheme(),
+              scaffoldBackgroundColor: const Color(0xFFF9F9F9),
+              textTheme: GoogleFonts.poppinsTextTheme().copyWith(
+                titleLarge: GoogleFonts.poppins(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+                titleMedium: GoogleFonts.poppins(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+                bodyLarge: GoogleFonts.poppins(
+                  fontSize: 16.sp,
+                  color: Colors.black87,
+                ),
+                bodyMedium: GoogleFonts.poppins(
+                  fontSize: 14.sp,
+                  color: Colors.grey[700],
+                ),
+              ),
               cardTheme: CardThemeData(
-                elevation: 2,
-                shadowColor: Colors.black.withOpacity(0.1),
+                elevation: 0,
+                shadowColor: Colors.black.withOpacity(0.05),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16.r),
                 ),
+                color: Colors.white,
               ),
               chipTheme: ChipThemeData(
                 backgroundColor: const Color(0xFFE8F5E9),
+                deleteIconColor: const Color(0xFF129575),
                 labelStyle: GoogleFonts.poppins(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
+                  color: const Color(0xFF129575),
                 ),
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
               ),
               appBarTheme: AppBarTheme(
                 centerTitle: false,
                 elevation: 0,
+                scrolledUnderElevation: 0,
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.black87,
                 titleTextStyle: GoogleFonts.poppins(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w700,
                   color: Colors.black87,
                 ),
               ),
               inputDecorationTheme: InputDecorationTheme(
                 filled: true,
-                fillColor: const Color(0xFFF5F7FA),
+                fillColor: const Color(0xFFF2F2F2),
+                hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14.sp),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(14.r),
                   borderSide: BorderSide.none,
                 ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14.r),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14.r),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF129575),
+                    width: 1.5,
+                  ),
+                ),
                 contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16.w,
-                  vertical: 14.h,
+                  horizontal: 20.w,
+                  vertical: 16.h,
+                ),
+              ),
+              elevatedButtonTheme: ElevatedButtonThemeData(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF129575),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 32.w,
+                    vertical: 16.h,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  textStyle: GoogleFonts.poppins(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),

@@ -359,6 +359,7 @@ class MealRecipeBloc extends Bloc<MealRecipeEvent, MealRecipeState> {
     emit(MealRecipeLoadingState());
     try {
       final recentMeals = await _getRecentMealsFromCache();
+      print("fetched ${recentMeals.length} recent meals from cache");
       if (recentMeals.isEmpty) {
         emit(MealRecipeInitial());
       } else {

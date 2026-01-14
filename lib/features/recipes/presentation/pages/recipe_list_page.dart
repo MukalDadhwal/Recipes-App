@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:recipes_app/core/constants/enums.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:recipes_app/features/recipes/data/models/area_model.dart';
 import 'package:recipes_app/features/recipes/data/models/category_model.dart';
 import 'package:recipes_app/features/recipes/data/models/meal_model.dart';
@@ -117,30 +118,26 @@ class _RecipeListPageState extends State<RecipeListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFFF9F9F9),
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Recipes App',
-              style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w600),
-            ),
-          ],
+        title: Text(
+          'Recipes',
+          style: TextStyle(fontSize: 26.sp, fontWeight: FontWeight.w700),
         ),
         actions: [
           Container(
             margin: EdgeInsets.symmetric(horizontal: 4.w),
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F7FA),
-              borderRadius: BorderRadius.circular(12.r),
+              color: const Color(0xFFF2F2F2),
+              borderRadius: BorderRadius.circular(10.r),
             ),
             child: IconButton(
               icon: Icon(
                 _viewMode == ViewMode.grid
                     ? Icons.view_list_rounded
                     : Icons.grid_view_rounded,
-                size: 22.sp,
+                size: 20.sp,
+                color: const Color(0xFF129575),
               ),
               onPressed: () {
                 setState(() {
@@ -154,11 +151,15 @@ class _RecipeListPageState extends State<RecipeListPage> {
           Container(
             margin: EdgeInsets.only(right: 12.w, left: 4.w),
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F7FA),
-              borderRadius: BorderRadius.circular(12.r),
+              color: const Color(0xFFF2F2F2),
+              borderRadius: BorderRadius.circular(10.r),
             ),
             child: PopupMenuButton<SortOption>(
-              icon: Icon(Icons.sort_rounded, size: 22.sp),
+              icon: Icon(
+                Icons.sort_rounded,
+                size: 20.sp,
+                color: const Color(0xFF129575),
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.r),
               ),
@@ -185,14 +186,22 @@ class _RecipeListPageState extends State<RecipeListPage> {
         children: [
           Container(
             color: Colors.white,
-            padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
+            padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
             child: TextField(
               controller: _searchController,
               onChanged: _onSearchChanged,
               decoration: InputDecoration(
-                hintText: 'Search recipes...',
-                hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14.sp),
-                prefixIcon: Icon(Icons.search_rounded, color: Colors.grey[600]),
+                hintText: 'Search any recipe...',
+                hintStyle: TextStyle(
+                  color: Colors.grey[400],
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w400,
+                ),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  color: Colors.grey[500],
+                  size: 22.sp,
+                ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: Icon(
@@ -229,66 +238,179 @@ class _RecipeListPageState extends State<RecipeListPage> {
               return Column(
                 children: [
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 8.h,
+                    ),
                     child: Row(
                       children: [
                         Expanded(
-                          child: DropdownButtonFormField<String>(
-                            value: _selectedCategory,
-                            isExpanded: true,
-                            decoration: InputDecoration(
-                              labelText: _categoriesLoading
-                                  ? 'Loading Categories...'
-                                  : 'Category',
-                              border: const OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 12.w,
-                                vertical: 8.h,
-                              ),
-                            ),
-                            items: _categories
-                                .map(
-                                  (cat) => DropdownMenuItem(
-                                    value: cat.name,
-                                    child: Text(
-                                      cat.name,
-                                      overflow: TextOverflow.ellipsis,
+                          child: _categoriesLoading
+                              ? Shimmer.fromColors(
+                                  baseColor: Colors.grey[300]!,
+                                  highlightColor: Colors.grey[100]!,
+                                  child: Container(
+                                    height: 48.h,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12.r),
                                     ),
                                   ),
                                 )
-                                .toList(),
-                            onChanged: _categoriesLoading
-                                ? null
-                                : _onCategorySelected,
-                          ),
+                              : Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12.r),
+                                    border: Border.all(
+                                      color: const Color(
+                                        0xFF129575,
+                                      ).withOpacity(0.2),
+                                      width: 1.5,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.03),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 16.w,
+                                    vertical: 4.h,
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      value: _selectedCategory,
+                                      isExpanded: true,
+                                      icon: Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                        color: const Color(0xFF129575),
+                                        size: 24.sp,
+                                      ),
+                                      hint: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.category_outlined,
+                                            size: 18.sp,
+                                            color: Colors.grey[600],
+                                          ),
+                                          SizedBox(width: 8.w),
+                                          Text(
+                                            'Category',
+                                            style: TextStyle(
+                                              fontSize: 15.sp,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.grey[700],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 15.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
+                                      ),
+                                      items: _categories
+                                          .map(
+                                            (cat) => DropdownMenuItem(
+                                              value: cat.name,
+                                              child: Text(
+                                                cat.name,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                      onChanged: _onCategorySelected,
+                                    ),
+                                  ),
+                                ),
                         ),
                         SizedBox(width: 12.w),
                         Expanded(
-                          child: DropdownButtonFormField<String>(
-                            value: _selectedArea,
-                            isExpanded: true,
-                            decoration: InputDecoration(
-                              labelText: _areasLoading
-                                  ? 'Loading Areas...'
-                                  : 'Area',
-                              border: const OutlineInputBorder(),
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 12.w,
-                                vertical: 8.h,
-                              ),
-                            ),
-                            items: _areas
-                                .map(
-                                  (area) => DropdownMenuItem(
-                                    value: area.name,
-                                    child: Text(
-                                      area.name,
-                                      overflow: TextOverflow.ellipsis,
+                          child: _areasLoading
+                              ? Shimmer.fromColors(
+                                  baseColor: Colors.grey[300]!,
+                                  highlightColor: Colors.grey[100]!,
+                                  child: Container(
+                                    height: 48.h,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12.r),
                                     ),
                                   ),
                                 )
-                                .toList(),
-                            onChanged: _areasLoading ? null : _onAreaSelected,
+                              : Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(12.r),
+                                    border: Border.all(
+                                      color: const Color(
+                                        0xFF129575,
+                                      ).withOpacity(0.2),
+                                      width: 1.5,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.03),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 16.w,
+                                    vertical: 4.h,
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      value: _selectedArea,
+                                      isExpanded: true,
+                                      icon: Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                        color: const Color(0xFF129575),
+                                        size: 24.sp,
+                                      ),
+                                      hint: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.public_outlined,
+                                            size: 18.sp,
+                                            color: Colors.grey[600],
+                                          ),
+                                          SizedBox(width: 8.w),
+                                          Text(
+                                            'Area',
+                                            style: TextStyle(
+                                              fontSize: 15.sp,
+                                              fontWeight: FontWeight.w500,
+                                              color: Colors.grey[700],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 15.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
+                                      ),
+                                      items: _areas
+                                          .map(
+                                            (area) => DropdownMenuItem(
+                                              value: area.name,
+                                              child: Text(
+                                                area.name,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                      onChanged: _areasLoading
+                                          ? null
+                                          : _onAreaSelected,
+                                    ),
+                                  ),
                           ),
                         ),
                       ],
@@ -306,16 +428,26 @@ class _RecipeListPageState extends State<RecipeListPage> {
                               Text(
                                 'Active Filters:',
                                 style: TextStyle(
-                                  fontSize: 12.sp,
+                                  fontSize: 13.sp,
                                   color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                               SizedBox(width: 8.w),
                               TextButton.icon(
                                 onPressed: _clearFilters,
-                                icon: Icon(Icons.clear_all, size: 16.sp),
-                                label: const Text('Clear All'),
+                                icon: Icon(
+                                  Icons.clear_all,
+                                  size: 16.sp,
+                                  color: const Color(0xFF129575),
+                                ),
+                                label: Text(
+                                  'Clear All',
+                                  style: TextStyle(
+                                    color: const Color(0xFF129575),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 style: TextButton.styleFrom(
                                   padding: EdgeInsets.symmetric(
                                     horizontal: 8.w,
@@ -337,9 +469,17 @@ class _RecipeListPageState extends State<RecipeListPage> {
                                 Chip(
                                   label: Text(
                                     _selectedCategory!,
-                                    style: TextStyle(color: Colors.black87),
+                                    style: const TextStyle(
+                                      color: Color(0xFF129575),
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                  deleteIcon: Icon(Icons.close, size: 16.sp),
+                                  backgroundColor: const Color(0xFFE8F5E9),
+                                  deleteIcon: Icon(
+                                    Icons.close,
+                                    size: 16.sp,
+                                    color: const Color(0xFF129575),
+                                  ),
                                   onDeleted: () {
                                     setState(() {
                                       _selectedCategory = null;
@@ -351,9 +491,17 @@ class _RecipeListPageState extends State<RecipeListPage> {
                                 Chip(
                                   label: Text(
                                     _selectedArea!,
-                                    style: TextStyle(color: Colors.black87),
+                                    style: const TextStyle(
+                                      color: Color(0xFF129575),
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                  deleteIcon: Icon(Icons.close, size: 16.sp),
+                                  backgroundColor: const Color(0xFFE8F5E9),
+                                  deleteIcon: Icon(
+                                    Icons.close,
+                                    size: 16.sp,
+                                    color: const Color(0xFF129575),
+                                  ),
                                   onDeleted: () {
                                     setState(() {
                                       _selectedArea = null;
@@ -372,7 +520,8 @@ class _RecipeListPageState extends State<RecipeListPage> {
             },
           ),
           Expanded(
-            child: BlocBuilder<MealRecipeBloc, MealRecipeState>(
+            child: BlocConsumer<MealRecipeBloc, MealRecipeState>(
+              listener: (context, state) {},
               buildWhen: (previous, current) =>
                   current is! CategoriesLoadedState &&
                   current is! AreasLoadedState,
@@ -437,7 +586,6 @@ class _RecipeListPageState extends State<RecipeListPage> {
   }
 
   Widget _buildMealsList(List<MealModel> meals) {
-    print("BUILDING MEAL MODEL LIST **********************");
     if (_viewMode == ViewMode.grid) {
       return GridView.builder(
         padding: EdgeInsets.all(16.w),
@@ -456,8 +604,12 @@ class _RecipeListPageState extends State<RecipeListPage> {
             imageUrl: meal.thumbnail ?? '',
             category: meal.category,
             area: meal.area,
-            onTap: () {
-              context.push('/recipe-detail/${meal.id}', extra: meal);
+            onTap: () async {
+              final bloc = context.read<MealRecipeBloc>();
+              await context.push('/recipe-detail/${meal.id}', extra: meal);
+              if (mounted) {
+                bloc.add(const LoadRecentMealsEvent());
+              }
             },
           );
         },
@@ -474,8 +626,12 @@ class _RecipeListPageState extends State<RecipeListPage> {
             imageUrl: meal.thumbnail ?? '',
             category: meal.category,
             area: meal.area,
-            onTap: () {
-              context.push('/recipe-detail/${meal.id}', extra: meal);
+            onTap: () async {
+              final bloc = context.read<MealRecipeBloc>();
+              await context.push('/recipe-detail/${meal.id}', extra: meal);
+              if (mounted) {
+                bloc.add(const LoadRecentMealsEvent());
+              }
             },
           );
         },
@@ -500,8 +656,12 @@ class _RecipeListPageState extends State<RecipeListPage> {
             id: meal.id,
             name: meal.name,
             imageUrl: meal.thumbnail,
-            onTap: () {
-              context.push('/recipe-detail/${meal.id}');
+            onTap: () async {
+              final bloc = context.read<MealRecipeBloc>();
+              await context.push('/recipe-detail/${meal.id}');
+              if (mounted) {
+                bloc.add(const LoadRecentMealsEvent());
+              }
             },
           );
         },
@@ -516,8 +676,12 @@ class _RecipeListPageState extends State<RecipeListPage> {
             id: meal.id,
             name: meal.name,
             imageUrl: meal.thumbnail,
-            onTap: () {
-              context.push('/recipe-detail/${meal.id}');
+            onTap: () async {
+              final bloc = context.read<MealRecipeBloc>();
+              await context.push('/recipe-detail/${meal.id}');
+              if (mounted) {
+                bloc.add(const LoadRecentMealsEvent());
+              }
             },
           );
         },
@@ -531,7 +695,7 @@ class _RecipeListPageState extends State<RecipeListPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.all(16.w),
+          padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
           child: Text(
             'Recently Viewed',
             style: Theme.of(

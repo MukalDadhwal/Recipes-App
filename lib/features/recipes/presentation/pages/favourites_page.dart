@@ -50,7 +50,13 @@ class _FavouritesPageState extends State<FavouritesPage>
     return BlocProvider.value(
       value: _favoritesBloc,
       child: Scaffold(
-        appBar: AppBar(title: const Text('Favourites'), actions: const []),
+        backgroundColor: const Color(0xFFF9F9F9),
+        appBar: AppBar(
+          title: Text(
+            'My Favorites',
+            style: TextStyle(fontSize: 26.sp, fontWeight: FontWeight.w700),
+          ),
+        ),
         body: BlocBuilder<FavoritesBloc, FavoritesState>(
           builder: (context, state) {
             if (state is FavoritesLoadingState) {
@@ -94,23 +100,39 @@ class _FavouritesPageState extends State<FavouritesPage>
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.favorite_border,
-                            size: 64.sp,
-                            color: Colors.grey[400],
+                          Container(
+                            padding: EdgeInsets.all(24.w),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE8F5E9),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.favorite_border_rounded,
+                              size: 64.sp,
+                              color: const Color(0xFF129575),
+                            ),
                           ),
-                          SizedBox(height: 16.h),
+                          SizedBox(height: 24.h),
                           Text(
                             'No favorites yet',
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(color: Colors.grey[600]),
+                            style: TextStyle(
+                              fontSize: 22.sp,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black87,
+                            ),
                           ),
-                          SizedBox(height: 8.h),
-                          Text(
-                            'Add meals to your favorites to see them here',
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: Colors.grey[500]),
-                            textAlign: TextAlign.center,
+                          SizedBox(height: 12.h),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 48.w),
+                            child: Text(
+                              'Start adding your favorite recipes and they\'ll appear here',
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                color: Colors.grey[600],
+                                height: 1.4,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ],
                       ),
