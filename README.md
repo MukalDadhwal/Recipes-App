@@ -148,10 +148,6 @@ flutter run
 flutter build apk --release
 ```
 
-**iOS:**
-```bash
-flutter build ios --release
-```
 
 ## API Reference
 
@@ -218,16 +214,5 @@ test/
             ├── bloc/    # BLoC tests
             └── widgets/ # Widget tests
 ```
-
-### Test Coverage
-- Unit tests for models and utilities
-- BLoC tests for state management
-- Widget tests for UI components
-- Target: >70% coverage for business logic
-
-
-## License
-
-This project is created for educational purposes.
 
 
